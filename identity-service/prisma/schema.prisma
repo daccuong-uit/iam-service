@@ -1,0 +1,24 @@
+// apps/identity-service/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-identity"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("IDENTITY_DATABASE_URL")
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id") // Reference to Account.id in auth-service
+  username    String   @unique
+  displayName String?  @map("display_name")
+  bio         String?
+  avatarUrl   String?  @map("avatar_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("profiles")
+}
