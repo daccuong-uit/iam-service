@@ -8,8 +8,8 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ProfileService } from './profile.service';
-import { CreateProfileDto, UpdateProfileDto } from './dto/profile.dto';
+import { ProfileService } from '../services/profile.service';
+import { CreateProfileDto, UpdateProfileDto } from '../dto/profile.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('profiles')

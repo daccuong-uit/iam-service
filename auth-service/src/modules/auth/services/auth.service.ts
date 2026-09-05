@@ -8,11 +8,11 @@ import {
 import { randomUUID } from 'crypto';
 import * as argon2 from 'argon2';
 import Redis from 'ioredis';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../../common/prisma/prisma.service';
 import { JwtService } from '@platform/auth-sdk';
 import { AuthErrorCode } from '@platform/auth-sdk';
-import { appConfig } from '../config/app.config';
-import { RegisterDto, LoginDto, SendOtpDto } from './dto/auth.dto';
+import { appConfig } from '../../../config/app.config';
+import { RegisterDto, LoginDto, SendOtpDto } from '../dto/auth.dto';
 import { createLogger } from '@platform/logger';
 import { EventBusService, UserCreatedEvent } from '@platform/common';
 import {
@@ -22,7 +22,7 @@ import {
   createOtpData,
   isOtpExpired,
   sendOtpSms,
-} from './utils/phone-otp.utils';
+} from '../utils/phone-otp.util';
 
 const logger = createLogger({ service: 'auth-service:auth' });
 

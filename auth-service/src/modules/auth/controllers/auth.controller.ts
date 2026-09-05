@@ -8,8 +8,8 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshTokenDto, SendOtpDto } from './dto/auth.dto';
+import { AuthService } from '../services/auth.service';
+import { RegisterDto, LoginDto, RefreshTokenDto, SendOtpDto } from '../dto/auth.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('auth')
