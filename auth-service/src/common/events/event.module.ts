@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EventBusService } from '@platform/common';
+import { EventBusService } from '@daccuong-uit/platform-event-bus';
 
 /**
  * Event Bus Module for Auth Service

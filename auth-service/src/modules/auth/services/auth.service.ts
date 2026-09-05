@@ -9,12 +9,13 @@ import { randomUUID } from 'crypto';
 import * as argon2 from 'argon2';
 import Redis from 'ioredis';
 import { PrismaService } from '../../../common/prisma/prisma.service';
-import { JwtService } from '@platform/auth-sdk';
-import { AuthErrorCode } from '@platform/auth-sdk';
+import { JwtService } from '@daccuong-uit/platform-security-sdk';
+import { AuthErrorCode } from '@daccuong-uit/platform-security-sdk';
 import { appConfig } from '../../../config/app.config';
 import { RegisterDto, LoginDto, SendOtpDto } from '../dto/auth.dto';
-import { createLogger } from '@platform/logger';
-import { EventBusService, UserCreatedEvent } from '@platform/common';
+import { createLogger } from '@daccuong-uit/platform-logger';
+import { EventBusService } from '@daccuong-uit/platform-event-bus';
+import { UserCreatedEvent } from '@daccuong-uit/contracts-events';
 import {
   generateOtp,
   validatePhoneNumber,

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { CreateProfileDto, UpdateProfileDto } from '../dto/profile.dto';
-import { createLogger } from '@platform/logger';
+import { createLogger } from '@daccuong-uit/platform-logger';
 
 const logger = createLogger({ service: 'identity-service:profile' });
 
