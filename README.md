@@ -11,6 +11,7 @@ docker compose up -d iam-postgres iam-service
 docker compose logs -f iam-service
 ```
 
+API base: `http://localhost:3001/api/v1`.
 Health check: `http://localhost:3001/health`.
 
 ## Configuration
