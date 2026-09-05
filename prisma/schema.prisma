@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String                 @id @default(uuid())
+  email                 String?                @unique
+  phoneNumber           String?                @unique @map("phone_number")
+  username              String                 @unique
+  preferredContactMethod ContactMethod?        @default(EMAIL) @map("preferred_contact_method")
+  status                UserStatus             @default(PENDING)
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+
+  profile       Profile?
+  credentials   Credential[]
+  sessions      Session[]
+  mfaFactors    MfaFactor[]
+  userRoles     UserRole[]
+
+  @@map("users")
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")
+  displayName String   @map("display_name")
+  bio         String?
+  avatarUrl   String?  @map("avatar_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Credential {
+  id           String         @id @default(uuid())
+  userId       String         @map("user_id")
+  type         CredentialType
+  passwordHash String?        @map("password_hash")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@index([userId])
+  @@map("credentials")
+}
+
+model Session {
+  id               String    @id @default(uuid())
+  userId           String    @map("user_id")
+  refreshTokenHash  String    @unique @map("refresh_token_hash")
+  expiresAt         DateTime  @map("expires_at")
+  revokedAt         DateTime? @map("revoked_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  lastUsedAt        DateTime? @map("last_used_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@map("sessions")
+}
+
+model MfaFactor {
+  id           String      @id @default(uuid())
+  userId       String      @map("user_id")
+  type         MfaType
+  secret       String?
+  verifiedAt   DateTime?   @map("verified_at")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("mfa_factors")
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId     String   @map("user_id")
+  roleId     String   @map("role_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String @map("role_id")
+  permissionId String @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  BANNED
+  DELETED
+}
+
+enum ContactMethod {
+  EMAIL
+  PHONE
+}
+
+enum CredentialType {
+  PASSWORD
+}
+
+enum MfaType {
+  TOTP
+  SMS
+  EMAIL
+}
