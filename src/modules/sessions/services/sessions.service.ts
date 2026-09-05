@@ -18,6 +18,16 @@ export class SessionsService {
     });
   }
 
+  async rotate(sessionId: string, refreshToken: string, expiresAt: Date) {
+    return this.prisma.$transaction(async (transaction) => {
+      const session = await transaction.session.findUniqueOrThrow({ where: { id: sessionId } });
+      await transaction.session.delete({ where: { id: sessionId } });
+      return transaction.session.create({
+        data: { userId: session.userId, refreshTokenHash: this.hash(refreshToken), expiresAt },
+      });
+    });
+  }
+
   private hash(value: string) {
     return createHash('sha256').update(value).digest('hex');
   }

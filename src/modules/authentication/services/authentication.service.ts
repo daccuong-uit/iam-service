@@ -140,7 +140,9 @@ export class AuthenticationService implements OnModuleDestroy {
       const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
       if (!user) throw new NotFoundException('Tài khoản không tồn tại');
       if (user.status === 'BANNED') throw new UnauthorizedException('Tài khoản của bạn đã bị khóa');
-      return { message: 'Làm mới token thành công', ...jwtService.signTokenPair(user.id, user.email || user.phoneNumber || user.username, randomUUID()) };
+      const tokens = jwtService.signTokenPair(user.id, user.email || user.phoneNumber || user.username, randomUUID());
+      await this.sessions.rotate(session.id, tokens.refreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+      return { message: 'Làm mới token thành công', ...tokens };
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof UnauthorizedException) throw error;
       throw new UnauthorizedException('Token xác thực không hợp lệ hoặc đã hết hạn');
