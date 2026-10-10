@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { createLogger } from '@daccuong-uit/platform-logger';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { CreateProfileDto, UpdateProfileDto } from '../dto/profile.dto';
@@ -9,17 +9,32 @@ const logger = createLogger({ service: 'iam-service:users' });
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createProfile(dto: CreateProfileDto) {
-    const user = await this.prisma.user.findUnique({ where: { id: dto.userId }, include: { profile: true } });
-    if (!user) throw new NotFoundException('Tài khoản không tồn tại');
-    if (user.username !== dto.username) throw new ConflictException('Username không khớp với tài khoản');
-    if (user.profile) throw new ConflictException('Hồ sơ người dùng đã tồn tại');
-
-    const profile = await this.prisma.profile.create({
-      data: { userId: user.id, displayName: dto.displayName ?? user.username },
+  async createProfile(dto: CreateProfileDto & { userId: string; email?: string; username?: string }) {
+    const username = dto.username || dto.userId.replaceAll('-', '');
+    const displayName = dto.displayName ?? username;
+    const user = await this.prisma.user.upsert({
+      where: { id: dto.userId },
+      create: {
+        id: dto.userId,
+        email: dto.email,
+        username,
+        profile: { create: { displayName } },
+      },
+      update: {
+        email: dto.email,
+        username,
+        profile: {
+          upsert: {
+            create: { displayName },
+            update: dto.displayName ? { displayName } : {},
+          },
+        },
+      },
+      include: { profile: true },
     });
-    logger.info('Profile created', { profileId: profile.id, userId: user.id });
-    return { message: 'Tạo hồ sơ thành công', ...profile, username: user.username };
+    const profile = user.profile!;
+    logger.info('Profile synchronized', { profileId: profile.id, userId: user.id });
+    return { message: 'Hồ sơ đã được đồng bộ', ...profile, username: user.username };
   }
 
   async getProfileByUsername(username: string) {

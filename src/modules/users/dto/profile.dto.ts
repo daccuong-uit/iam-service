@@ -1,18 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 
 export class CreateProfileDto {
-  @ApiProperty()
-  @IsString()
-  userId!: string;
-
-  @ApiProperty({ example: 'johndoe' })
-  @IsString()
-  @MinLength(3)
-  @MaxLength(30)
-  @Matches(/^[a-zA-Z0-9_]+$/)
-  username!: string;
-
   @ApiPropertyOptional({ example: 'John Doe' })
   @IsOptional()
   @IsString()
